@@ -105,7 +105,8 @@
   .aspect-pill.done:hover{opacity:.8;border-color:rgba(201,162,75,.4);}
 
   .draw-area{text-align:center;margin-bottom:0;}
-  .draw-area-bottom{margin-top:18px;}
+  .draw-area-bottom{margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .donate-link-bottom{width:auto;max-width:360px;margin:0;font-size:13px;padding:9px 20px;}
   button.draw-btn{
     font-family:'Noto Sans Thai',sans-serif;font-weight:600;font-size:11px;
     background:linear-gradient(180deg,var(--gold-soft),var(--gold));
@@ -395,6 +396,7 @@
 
   <div class="draw-area draw-area-bottom">
     <button class="reset-btn" id="resetBtn2" disabled>จบคำทำนาย / เริ่มทำนายใหม่</button>
+    <button type="button" class="reset-btn donate-link-bottom" id="donateLinkBottom" aria-label="เปิด QR code น้อมบูชาค่าครู">🕯️ น้อมบูชาค่าครู และสิ่งศักดิ์สิทธิ์ 🕯️</button>
   </div>
 
   <div class="copyright">©️2024 ไพ่เทวะรัตติกาล โดย แหม่ม มูต้องมนต์ สงวนลิขสิทธิ์ตามกฎหมาย</div>
@@ -551,11 +553,13 @@ const revisitEl = document.getElementById('revisit');
 const hintEl = document.getElementById('hint');
 const drawBtn = document.getElementById('drawBtn');
 const resetBtn2 = document.getElementById('resetBtn2');
+const donateLinkBottomEl = document.getElementById('donateLinkBottom');
 const aspectPickerEl = document.getElementById('aspectPicker');
 
 function setResetBtnsState(enabled){
   resetBtn2.disabled = !enabled;
   resetBtn2.classList.toggle('ready', enabled);
+  donateLinkBottomEl.classList.toggle('ready', enabled);
 }
 
 let usedCardIndices = new Set(); // deck indices used in this reading
@@ -838,6 +842,7 @@ donateModalClose.addEventListener('click', closeDonateModal);
 donateModalOverlay.addEventListener('click', (e) => {
   if(e.target === donateModalOverlay) closeDonateModal(); // คลิกพื้นหลังนอกกล่องเพื่อปิด
 });
+document.getElementById('donateLinkBottom').addEventListener('click', openDonateModal);
 document.addEventListener('keydown', (e) => {
   if(e.key === 'Escape') closeDonateModal();
 });
