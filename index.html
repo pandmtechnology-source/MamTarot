@@ -105,6 +105,7 @@
   .aspect-pill.done:hover{opacity:.8;border-color:rgba(201,162,75,.4);}
 
   .draw-area{text-align:center;margin-bottom:0;}
+  .draw-area-bottom{margin-top:18px;}
   button.draw-btn{
     font-family:'Noto Sans Thai',sans-serif;font-weight:600;font-size:11px;
     background:linear-gradient(180deg,var(--gold-soft),var(--gold));
@@ -393,6 +394,10 @@
 
   <div class="spread" id="spread" aria-live="polite"></div>
 
+  <div class="draw-area draw-area-bottom">
+    <button class="reset-btn" id="resetBtn2" disabled>จบคำทำนาย / เริ่มทำนายใหม่</button>
+  </div>
+
   <div class="copyright">©️2024 ไพ่เทวะรัตติกาล โดย แหม่ม มูต้องมนต์ สงวนลิขสิทธิ์ตามกฎหมาย</div>
 
 </div>
@@ -547,7 +552,15 @@ const revisitEl = document.getElementById('revisit');
 const hintEl = document.getElementById('hint');
 const drawBtn = document.getElementById('drawBtn');
 const resetBtn = document.getElementById('resetBtn');
+const resetBtn2 = document.getElementById('resetBtn2');
 const aspectPickerEl = document.getElementById('aspectPicker');
+
+function setResetBtnsState(enabled){
+  [resetBtn, resetBtn2].forEach(btn => {
+    btn.disabled = !enabled;
+    btn.classList.toggle('ready', enabled);
+  });
+}
 
 let usedCardIndices = new Set(); // deck indices used in this reading
 let currentAspect = null;        // the one topic chosen for this reading
@@ -684,8 +697,7 @@ function openCard(card, deckIndex){
   renderTopicSummary(revealedSoFar, pendingDraw.revealed.size === 3);
 
   if(pendingDraw.revealed.size === 3){
-    resetBtn.disabled = false;
-    resetBtn.classList.add('ready');
+    setResetBtnsState(true);
     hintEl.textContent = '';
   } else {
     hintEl.textContent = `เปิดแล้ว ${pendingDraw.revealed.size}/3 ใบ`;
@@ -701,8 +713,7 @@ function resetAll(){
   spreadEl.innerHTML = '';
   topicSummariesEl.innerHTML = '';
   revisitEl.innerHTML = '';
-  resetBtn.disabled = true;
-  resetBtn.classList.remove('ready');
+  setResetBtnsState(false);
   renderAspectPicker();
   hintEl.textContent = '';
   clearSavedState();
@@ -736,6 +747,9 @@ function renderTopicSummary(indices, complete){
 drawBtn.addEventListener('click', drawOptions);
 resetBtn.addEventListener('click', () => {
   if(!resetBtn.disabled) resetAll();
+});
+resetBtn2.addEventListener('click', () => {
+  if(!resetBtn2.disabled) resetAll();
 });
 
 // initial state on load — restore any in-progress/completed reading (survives back-navigation / reload)
@@ -792,8 +806,7 @@ function loadState(){
       renderTopicSummary(revealedSoFar, pendingDraw.revealed.size === 3);
     }
     if(pendingDraw.revealed.size === 3){
-      resetBtn.disabled = false;
-      resetBtn.classList.add('ready');
+      setResetBtnsState(true);
     }
     return true;
   }catch(e){
