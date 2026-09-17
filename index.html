@@ -1085,7 +1085,7 @@ function playFootstepSequence(ctx, destination){
     }
 
     const pan = side * (0.85 - progress * 0.35); // เริ่มชัดจากด้านข้าง แล้วขยับเข้าใกล้กึ่งกลางเล็กน้อยตอนใกล้
-    const gain = 0.025 + progress * 0.07; // เพิ่มความดังโดยรวมขึ้น ให้ได้ยินชัดขึ้นทั้งบนคอมและมือถือ
+    const gain = (0.025 + progress * 0.07) * 0.7; // ลดความดังเสียงเอฟเฟกต์ (เสียงฝีเท้า) ลง 30% ตามคำขอผู้ใช้
     const stepTimer = setTimeout(() => {
       if(!ambientRunning) return;
       playFootstep(ctx, destination, { pan, gain, brightness: progress });
