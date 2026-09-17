@@ -305,7 +305,7 @@
     75%{transform:translateY(2px) scale(1.02) rotate(1deg);}
     100%{opacity:1;transform:translateY(0) scale(1) rotate(0deg);filter:drop-shadow(0 0 0 rgba(228,200,119,0));}
   }
-  .card.card-deal{animation:dealFromButton 2.04s cubic-bezier(.22,.75,.3,1) both;transition:none;}
+  .card.card-deal{animation:dealFromButton 1s cubic-bezier(.22,.75,.3,1) both;transition:none;}
   .detail-head{display:flex;align-items:baseline;gap:5px;margin-bottom:7px;}
   .detail-head .num{
     font-family:'Noto Serif Thai',serif;color:var(--gold-soft);font-size:10px;
@@ -717,6 +717,7 @@ function renderSpread(animate){
   const cardEl = slot.querySelector('.card');
   const reveal = () => {
     if(!pendingDraw || pendingDraw.revealed.has(deckIndex)) return;
+    cardEl.classList.remove('card-deal'); // ตัดแอนิเมชันบินเข้าทิ้งทันที กันไม่ให้แย่งคิวกับแอนิเมชันพลิก
     cardEl.classList.add('flipped');
     openCard(card, deckIndex);
   };
@@ -756,10 +757,6 @@ function openCard(card, deckIndex){
   usedCardIndices.add(deckIndex);
   readingLocked = true;
   renderAspectPicker();
-
-  if(audioCtx && ambientRunning){
-    playFootstepSequence(audioCtx, audioCtx.destination); // เปิดไพ่ → เสียงคนเดินเริ่มทำงาน
-  }
 
   renderMeaningPanel(card);
   renderDonateBanner();
