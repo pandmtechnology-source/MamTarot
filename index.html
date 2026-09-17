@@ -154,10 +154,49 @@
   .spread{
     display:flex;
     justify-content:center;
-    flex-wrap:nowrap;
+    flex-wrap:wrap;
     gap:clamp(8px,3vw,16px);
     perspective:1600px;
   }
+  .reveal-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:clamp(14px,4vw,32px);
+    width:100%;
+    flex-wrap:wrap;
+  }
+  .reveal-row .slot{
+    flex:0 0 auto;
+    width:min(221px,55vw);
+    max-width:221px;
+    margin-left:clamp(8px,3vw,20px);
+  }
+  .meaning-panel{
+    flex:1 1 260px;
+    max-width:420px;
+    min-width:220px;
+    opacity:0;
+    transform:translateX(10px);
+    transition:opacity .5s ease, transform .5s ease;
+  }
+  .meaning-panel.visible{
+    opacity:1;
+    transform:translateX(0);
+  }
+  .meaning-card{
+    background:rgba(0,0,0,.28);
+    border:1px solid rgba(201,162,75,.4);
+    border-radius:10px;
+    padding:14px 16px;
+  }
+  .meaning-head{
+    display:flex;align-items:center;gap:6px;
+    font-family:'Noto Serif Thai',serif;font-weight:600;
+    font-size:14px;color:var(--gold-soft);letter-spacing:.02em;margin-bottom:8px;
+  }
+  .meaning-head i{font-size:13px;}
+  .meaning-text{margin:0;font-size:13px;line-height:1.7;color:var(--text);}
   .slot{
     flex:1 1 0;max-width:160px;min-width:0;
     animation:cardFloat 6.8s ease-in-out infinite;
@@ -378,7 +417,7 @@
   <header>
     <div class="eyebrow"><span class="eyebrow-lines"><span>คำทำนายจากไพ่</span><span>เทวะ รัตติกาล</span></span></div>
     <h1>พยากรณ์โดย<br>"แหม่ม มูต้องมนต์"</h1>
-    <p class="sub">เลือกด้านที่ต้องการทำนาย กด "PICK A CARD" เปิดดูให้ครบทั้ง 3 ใบ</p>
+    <p class="sub">เลือกด้านที่ต้องการทำนาย กด "PICK A CARD" แล้วแตะไพ่เพื่อเปิดดูคำทำนาย</p>
   </header>
 
   <div class="aspect-picker" id="aspectPicker" role="group" aria-label="เลือกด้านที่ต้องการทำนาย"></div>
@@ -589,13 +628,10 @@ function renderAspectPicker(){
   });
 }
 
-function pickThreeUnused(){
+function pickOneUnused(){
   const available = DECK.map((_, i) => i).filter(i => !usedCardIndices.has(i));
-  for(let i = available.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [available[i], available[j]] = [available[j], available[i]];
-  }
-  return available.slice(0, 3);
+  const idx = Math.floor(Math.random() * available.length);
+  return [available[idx]];
 }
 
 function backSvg(){
@@ -621,8 +657,8 @@ function drawOptions(){
     hintEl.textContent = 'กรุณาเลือกด้านที่ต้องการทำนายก่อนกด "PICK A CARD"';
     return;
   }
-  if(readingLocked) return; // already opening cards — must finish or reset first
-  pendingDraw = { indices: pickThreeUnused(), revealed: new Set() };
+  if(readingLocked) return; // already opening a card — must finish or reset first
+  pendingDraw = { indices: pickOneUnused(), revealed: new Set() };
   renderSpread(true);
   triggerLightningFlash(); // กด PICK A CARD สำเร็จ → ฟ้าแลบทันที
 }
@@ -631,77 +667,95 @@ function renderSpread(animate){
   spreadEl.innerHTML = '';
   if(!pendingDraw) return;
   const dealOffset = animate ? getDealOffset() : null;
+  const deckIndex = pendingDraw.indices[0];
+  const card = DECK[deckIndex];
+  const isRevealed = pendingDraw.revealed.has(deckIndex);
 
-  pendingDraw.indices.forEach((deckIndex, pos) => {
-    const card = DECK[deckIndex];
-    const slot = document.createElement('div');
-    slot.className = 'slot';
-    slot.style.animationDelay = `${(Math.random() * 6.8).toFixed(2)}s`;
-    if(animate){
-      slot.style.animationPlayState = 'paused';
-    }
-    const isRevealed = pendingDraw.revealed.has(deckIndex);
-    const animClass = animate ? ' card-deal' : '';
-    const animStyle = animate ? ` style="animation-delay:${pos * 0.336}s;--deal-offset:${dealOffset}px"` : '';
-    slot.innerHTML = `
-      <div class="card${isRevealed ? ' flipped' : ''}${animClass}"${animStyle} role="button" tabindex="0" aria-label="ไพ่ใบที่ ${pos+1}, แตะเพื่อเปิด">
-        <div class="face back">
-          ${backSvg()}
-        </div>
-        <div class="face front${card.img ? ' has-art' : ''}">
-          ${card.img
-            ? `<img class="card-art" src="${card.img}" alt="${card.name}" loading="lazy">`
-            : `<div class="card-symbol">${card.symbol}</div><div class="card-name">${card.name}</div>`}
-        </div>
-      </div>`;
-    spreadEl.appendChild(slot);
+  const row = document.createElement('div');
+  row.className = 'reveal-row';
 
-    const cardEl = slot.querySelector('.card');
-    const reveal = () => {
-      if(!pendingDraw || pendingDraw.revealed.has(deckIndex)) return;
-      cardEl.classList.add('flipped');
-      openCard(card, deckIndex);
-    };
-    cardEl.addEventListener('click', reveal);
-    cardEl.addEventListener('keydown', e => {
-      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); reveal(); }
-    });
-    const glowDelay = `${(Math.random() * 10).toFixed(2)}s`;
-    if(!animate){
-      cardEl.style.animationDelay = glowDelay;
-    }
-    if(animate){
-      cardEl.addEventListener('animationend', () => {
-        cardEl.classList.remove('card-deal');
-        cardEl.style.animationDelay = glowDelay;
-        slot.style.animationPlayState = 'running';
-      }, { once: true });
-    }
+  const slot = document.createElement('div');
+  slot.className = 'slot';
+  slot.style.animationDelay = `${(Math.random() * 6.8).toFixed(2)}s`;
+  if(animate){
+    slot.style.animationPlayState = 'paused';
+  }
+  const animClass = animate ? ' card-deal' : '';
+  const animStyle = animate ? ` style="animation-delay:0s;--deal-offset:${dealOffset}px"` : '';
+  slot.innerHTML = `
+    <div class="card${isRevealed ? ' flipped' : ''}${animClass}"${animStyle} role="button" tabindex="0" aria-label="ไพ่ใบนี้ แตะเพื่อเปิด">
+      <div class="face back">
+        ${backSvg()}
+      </div>
+      <div class="face front${card.img ? ' has-art' : ''}">
+        ${card.img
+          ? `<img class="card-art" src="${card.img}" alt="${card.name}" loading="lazy">`
+          : `<div class="card-symbol">${card.symbol}</div><div class="card-name">${card.name}</div>`}
+      </div>
+    </div>`;
+  row.appendChild(slot);
+
+  const meaningPanel = document.createElement('div');
+  meaningPanel.className = 'meaning-panel';
+  row.appendChild(meaningPanel);
+
+  spreadEl.appendChild(row);
+
+  if(isRevealed){
+    renderMeaningPanel(card);
+  }
+
+  const cardEl = slot.querySelector('.card');
+  const reveal = () => {
+    if(!pendingDraw || pendingDraw.revealed.has(deckIndex)) return;
+    cardEl.classList.add('flipped');
+    openCard(card, deckIndex);
+  };
+  cardEl.addEventListener('click', reveal);
+  cardEl.addEventListener('keydown', e => {
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); reveal(); }
   });
+  const glowDelay = `${(Math.random() * 10).toFixed(2)}s`;
+  if(!animate){
+    cardEl.style.animationDelay = glowDelay;
+  }
+  if(animate){
+    cardEl.addEventListener('animationend', () => {
+      cardEl.classList.remove('card-deal');
+      cardEl.style.animationDelay = glowDelay;
+      slot.style.animationPlayState = 'running';
+    }, { once: true });
+  }
+}
+
+function renderMeaningPanel(card){
+  const panel = spreadEl.querySelector('.meaning-panel');
+  if(!panel) return;
+  const a = ASPECTS.find(x => x.key === currentAspect);
+  panel.innerHTML = `
+    <div class="meaning-card">
+      <div class="meaning-head"><i class="ti ${a.icon}" aria-hidden="true"></i>${card.name}</div>
+      <p class="meaning-text">${card.m[a.key]}</p>
+    </div>`;
+  requestAnimationFrame(() => panel.classList.add('visible'));
 }
 
 function openCard(card, deckIndex){
   if(!pendingDraw || pendingDraw.revealed.has(deckIndex)) return;
 
-  const isFirstCardOfDraw = pendingDraw.revealed.size === 0;
   pendingDraw.revealed.add(deckIndex);
   usedCardIndices.add(deckIndex);
   readingLocked = true;
   renderAspectPicker();
 
-  if(isFirstCardOfDraw && audioCtx && ambientRunning){
-    playFootstepSequence(audioCtx, audioCtx.destination); // เปิดไพ่ใบแรก → เสียงคนเดินเริ่มทำงาน
+  if(audioCtx && ambientRunning){
+    playFootstepSequence(audioCtx, audioCtx.destination); // เปิดไพ่ → เสียงคนเดินเริ่มทำงาน
   }
 
-  const revealedSoFar = pendingDraw.indices.filter(i => pendingDraw.revealed.has(i));
-  renderTopicSummary(revealedSoFar, pendingDraw.revealed.size === 3);
-
-  if(pendingDraw.revealed.size === 3){
-    setResetBtnsState(true);
-    hintEl.textContent = '';
-  } else {
-    hintEl.textContent = `เปิดแล้ว ${pendingDraw.revealed.size}/3 ใบ`;
-  }
+  renderMeaningPanel(card);
+  renderDonateBanner();
+  setResetBtnsState(true);
+  hintEl.textContent = '';
   saveState();
 }
 
@@ -719,28 +773,15 @@ function resetAll(){
   clearSavedState();
 }
 
-function renderTopicSummary(indices, complete){
-  topicSummariesEl.innerHTML = '';
-  const a = ASPECTS.find(x => x.key === currentAspect);
-  const rows = indices.map(deckIndex => {
-    const card = DECK[deckIndex];
-    return `
-      <div class="aspect">
-        <div class="label"><i class="ti ${a.icon}" aria-hidden="true"></i>${card.name}</div>
-        <p>${card.m[a.key]}</p>
-      </div>`;
-  }).join('');
-
+function renderDonateBanner(){
   const panel = document.createElement('div');
   panel.className = 'summary-card';
   panel.innerHTML = `
-    ${complete ? `
-      <button type="button" class="summary-donate-link" aria-label="เปิด QR code น้อมบูชาค่าครู">
-        <div class="summary-brand">คำทำนายจากไพ่ "เทวะรัตติกาล"</div>
-        <div class="summary-blessing">🕯️เสริมพลังให้คำทำนายดวงชะตา น้อมบูชาค่าครูและสิ่งศักดิ์สิทธิ์ <svg class="scan-icon-inline" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2"/><path d="M4 16v2a2 2 0 0 0 2 2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M16 20h2a2 2 0 0 0 2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>🕯️</div>
-      </button>
-    ` : ''}
-    <div class="aspects">${rows}</div>`;
+    <button type="button" class="summary-donate-link" aria-label="เปิด QR code น้อมบูชาค่าครู">
+      <div class="summary-brand">คำทำนายจากไพ่ "เทวะรัตติกาล"</div>
+      <div class="summary-blessing">🕯️เสริมพลังให้คำทำนายดวงชะตา น้อมบูชาค่าครูและสิ่งศักดิ์สิทธิ์ <svg class="scan-icon-inline" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2"/><path d="M4 16v2a2 2 0 0 0 2 2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M16 20h2a2 2 0 0 0 2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>🕯️</div>
+    </button>`;
+  topicSummariesEl.innerHTML = '';
   topicSummariesEl.appendChild(panel);
 }
 
@@ -799,10 +840,7 @@ function loadState(){
 
     renderSpread(false);
     if(pendingDraw.revealed.size > 0){
-      const revealedSoFar = pendingDraw.indices.filter(i => pendingDraw.revealed.has(i));
-      renderTopicSummary(revealedSoFar, pendingDraw.revealed.size === 3);
-    }
-    if(pendingDraw.revealed.size === 3){
+      renderDonateBanner();
       setResetBtnsState(true);
     }
     return true;
@@ -834,7 +872,7 @@ function openDonateModal(){
 function closeDonateModal(){
   donateModalOverlay.classList.remove('open');
 }
-// event delegation: ข้อความ .summary-donate-link ถูกสร้างใหม่ทุกครั้งที่ renderTopicSummary ทำงาน
+// event delegation: ข้อความ .summary-donate-link ถูกสร้างใหม่ทุกครั้งที่ renderDonateBanner ทำงาน
 topicSummariesEl.addEventListener('click', (e) => {
   if(e.target.closest('.summary-donate-link')) openDonateModal();
 });
