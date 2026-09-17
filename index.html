@@ -168,7 +168,7 @@
   }
   .reveal-row .slot{
     flex:0 0 auto;
-    width:clamp(92px,34vw,221px);
+    width:clamp(110px,41vw,265px);
   }
   .meaning-panel{
     flex:1 1 auto;
@@ -266,8 +266,8 @@
   }
   #revisit .revisit-close:hover{color:var(--text);}
   .summary-card{
-    background:var(--panel);border:1px solid rgba(201,162,75,.5);
-    border-radius:8px;padding:11px 12px;
+    background:transparent;border:none;
+    border-radius:8px;padding:0;
     animation:rise .4s ease both;
   }
   .summary-brand{
@@ -777,7 +777,6 @@ function renderDonateBanner(){
   panel.innerHTML = `
     <button type="button" class="summary-donate-link" aria-label="เปิด QR code น้อมบูชาค่าครู">
       <div class="summary-brand">คำทำนายจากไพ่ "เทวะรัตติกาล"</div>
-      <div class="summary-blessing">🕯️เสริมพลังให้คำทำนายดวงชะตา น้อมบูชาค่าครูและสิ่งศักดิ์สิทธิ์ <svg class="scan-icon-inline" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2"/><path d="M4 16v2a2 2 0 0 0 2 2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M16 20h2a2 2 0 0 0 2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>🕯️</div>
     </button>`;
   topicSummariesEl.innerHTML = '';
   topicSummariesEl.appendChild(panel);
