@@ -140,6 +140,29 @@
     50%{box-shadow:0 0 0 8px rgba(228,200,119,0);}
   }
 
+  /* ปุ่ม "ดูดวงส่วนตัวกับแหม่ม มูต้องมนต์" ให้โดดเด่นกว่าปุ่มอื่นๆ */
+  button.line-cta{
+    font-size:14px;font-weight:700;padding:12px 26px;
+    background:linear-gradient(135deg,var(--rose),var(--gold-soft),var(--rose));
+    background-size:220% 220%;
+    color:#2A1006;border:1px solid rgba(255,235,205,.6);
+    box-shadow:0 10px 26px -6px rgba(176,112,143,.65), 0 0 0 0 rgba(228,200,119,.6);
+    animation:lineCtaGlow 2.2s ease-in-out infinite, lineCtaShift 5s ease-in-out infinite;
+    transform:scale(1.04);
+  }
+  button.line-cta:hover{
+    transform:scale(1.08) translateY(-2px);
+    box-shadow:0 14px 30px -6px rgba(176,112,143,.8), 0 0 0 6px rgba(228,200,119,.25);
+  }
+  @keyframes lineCtaGlow{
+    0%,100%{box-shadow:0 10px 26px -6px rgba(176,112,143,.65), 0 0 0 0 rgba(228,200,119,.55);}
+    50%{box-shadow:0 10px 26px -6px rgba(176,112,143,.85), 0 0 0 10px rgba(228,200,119,0);}
+  }
+  @keyframes lineCtaShift{
+    0%,100%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+  }
+
   .hint{margin-top:0;font-size:13px;color:var(--text-muted);}
 
   .copyright{
@@ -444,7 +467,7 @@
   <div class="draw-area draw-area-bottom">
     <button class="reset-btn" id="resetBtn2" disabled>จบคำทำนาย / เริ่มทำนายใหม่</button>
     <button type="button" class="reset-btn donate-link-bottom" id="donateLinkBottom" aria-label="เปิด QR code น้อมบูชาค่าครู">🕯️ น้อมบูชาค่าครู และสิ่งศักดิ์สิทธิ์ 🕯️</button>
-    <button type="button" class="reset-btn donate-link-bottom" id="lineLinkBottom" aria-label="เปิด QR code LINE ดูดวงส่วนตัว">⚡ ดูดวงส่วนตัวกับ แหม่ม มูต้องมนต์ ⚡</button>
+    <button type="button" class="reset-btn donate-link-bottom line-cta" id="lineLinkBottom" aria-label="เปิด QR code LINE ดูดวงส่วนตัว">⚡ ดูดวงส่วนตัวกับ แหม่ม มูต้องมนต์ ⚡</button>
   </div>
 
   <div class="copyright">©️2024 ไพ่เทวะรัตติกาล โดย แหม่ม มูต้องมนต์ สงวนลิขสิทธิ์ตามกฎหมาย</div>
