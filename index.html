@@ -144,7 +144,8 @@
   /* เพิ่ม specificity ให้ชนะ button.reset-btn.ready เพื่อให้แอนิเมชันไม่ถูกทับตอนกดเปิดไพ่ */
   button.reset-btn.line-cta,
   button.reset-btn.line-cta.ready{
-    font-size:14px;font-weight:700;padding:6px 13px;
+    font-size:clamp(11px,3.6vw,14px);font-weight:700;padding:6px 13px;
+    white-space:nowrap;max-width:calc(100vw - 24px);box-sizing:border-box;
     background:linear-gradient(135deg,var(--rose),var(--gold-soft),var(--rose));
     background-size:220% 220%;
     color:#2A1006;border:1px solid rgba(255,235,205,.6);
