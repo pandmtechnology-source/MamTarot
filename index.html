@@ -962,7 +962,7 @@ function startWind(ctx, destination){
   filter.Q.value = 0.6;
 
   const gain = ctx.createGain();
-  const baseGain = 0.02; // เพิ่มความดังโดยรวมขึ้น ให้ได้ยินชัดขึ้นทั้งบนคอมและมือถือ
+  const baseGain = 0.01; /* ลดความดังเสียงลมลง 50% */ // // เพิ่มความดังโดยรวมขึ้น ให้ได้ยินชัดขึ้นทั้งบนคอมและมือถือ
   const startNow = ctx.currentTime;
   gain.gain.setValueAtTime(0.0001, startNow);
   gain.gain.linearRampToValueAtTime(baseGain, startNow + 5); // เริ่มเปิดโปรแกรม: เสียงค่อยๆ ดังขึ้นจากเบาไปหาระดับปกติ (ไล่ระดับ 5 วิ)
@@ -981,7 +981,7 @@ function startWind(ctx, destination){
   volLfo.type = 'sine';
   volLfo.frequency.value = 0.035; // 1 รอบ (เบา→ดัง→เบา) ประมาณ 28 วินาที
   const volLfoGain = ctx.createGain();
-  volLfoGain.gain.value = 0.016; // เพิ่มขึ้นตามสัดส่วนกับ baseGain
+  volLfoGain.gain.value = 0.008; /* ลดลง 50% ตาม baseGain */ // // เพิ่มขึ้นตามสัดส่วนกับ baseGain
   volLfo.connect(volLfoGain);
   volLfoGain.connect(gain.gain);
   volLfo.start();
@@ -1114,7 +1114,7 @@ function playFootstepSequence(ctx, destination){
     }
 
     const pan = side * (0.85 - progress * 0.35); // เริ่มชัดจากด้านข้าง แล้วขยับเข้าใกล้กึ่งกลางเล็กน้อยตอนใกล้
-    const gain = (0.025 + progress * 0.07) * 0.7; // ลดความดังเสียงเอฟเฟกต์ (เสียงฝีเท้า) ลง 30% ตามคำขอผู้ใช้
+    const gain = (0.025 + progress * 0.07) * 0.35; // ลดความดังเสียงเอฟเฟกต์ (เสียงฝีเท้า) ลงอีก 50% ตามคำขอผู้ใช้
     const stepTimer = setTimeout(() => {
       if(!ambientRunning) return;
       playFootstep(ctx, destination, { pan, gain, brightness: progress });
