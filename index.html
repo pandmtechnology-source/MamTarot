@@ -1248,9 +1248,9 @@ tryAutoStartOnLoad();
 (function(){
   const el = document.getElementById('visitorCount');
   if(!el) return;
-  fetch('https://api.countapi.xyz/hit/pandmtechnology-mamtarot/site-visits')
+  fetch('https://abacus.jasoncameron.dev/hit/mamtarot-pandmtechnology.vercel.app/site-visits')
     .then(r => r.json())
-    .then(data => { el.textContent = data.value ?? '–'; })
+    .then(data => { el.textContent = (data && typeof data.value !== 'undefined') ? data.value : '–'; })
     .catch(() => { el.textContent = '–'; });
 })();
 </script>
